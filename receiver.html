@@ -75,6 +75,7 @@
                 cast.framework.events.EventType.MEDIA_STATUS,
                 function(event) {
                     if (event.mediaStatus && event.mediaStatus.playerState === 'IDLE') {
+                        console.log('Player is idle', event);
                         showIdleScreen();
                     }
                 }
@@ -100,15 +101,23 @@
             const mediaInfo = event.mediaInfo;
             const contentType = mediaInfo.contentType;
             const contentUrl = mediaInfo.contentId;
-            
+
+            console.log('Media Info:', mediaInfo);
+            console.log('Content Type:', contentType);
+            console.log('Content URL:', contentUrl);
+
             if (contentType.startsWith('video')) {
                 videoElement.src = contentUrl;
                 videoElement.style.display = 'block';
-                videoElement.play();
+                videoElement.play().catch(error => {
+                    console.error('Error playing video:', error);
+                });
             } else if (contentType.startsWith('audio')) {
                 audioElement.src = contentUrl;
                 audioElement.style.display = 'block';
-                audioElement.play();
+                audioElement.play().catch(error => {
+                    console.error('Error playing audio:', error);
+                });
             } else if (contentType.startsWith('image')) {
                 imageElement.src = contentUrl;
                 imageElement.style.display = 'block';
@@ -132,4 +141,3 @@
     </script>
 </body>
 </html>
-

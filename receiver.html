@@ -20,15 +20,26 @@
             text-align: center;
             padding-top: 20px;
         }
-        .video {
+        .media {
             width: 100%;
             height: 100%;
+        }
+        #videoElement, #audioElement, #imageElement {
+            display: none;
+        }
+        .idle-screen {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="video">
+    <div class="media">
         <video id="videoElement" controls></video>
+        <audio id="audioElement" controls></audio>
+        <img id="imageElement" alt="Image" />
+    </div>
+    <div id="idleScreen" class="idle-screen">
+        <h1>Screen Casting</h1>
     </div>
 
     <script type="text/javascript">
@@ -44,12 +55,81 @@
                 }
             );
 
-            playerManager.addEventListener(cast.framework.events.EventType.PLAYER_LOAD_COMPLETE, function(event) {
-                console.log('Player load complete', event);
-            });
+            playerManager.addEventListener(
+                cast.framework.events.EventType.PLAYER_LOAD_COMPLETE,
+                function(event) {
+                    console.log('Player load complete', event);
+                    handleMediaLoad(event);
+                }
+            );
+
+            playerManager.addEventListener(
+                cast.framework.events.EventType.PLAYER_STOPPED,
+                function(event) {
+                    console.log('Player stopped', event);
+                    showIdleScreen();
+                }
+            );
+
+            playerManager.addEventListener(
+                cast.framework.events.EventType.MEDIA_STATUS,
+                function(event) {
+                    if (event.mediaStatus && event.mediaStatus.playerState === 'IDLE') {
+                        showIdleScreen();
+                    }
+                }
+            );
 
             context.start();
+
+            showIdleScreen();
         };
+
+        function handleMediaLoad(event) {
+            const videoElement = document.getElementById('videoElement');
+            const audioElement = document.getElementById('audioElement');
+            const imageElement = document.getElementById('imageElement');
+            const idleScreen = document.getElementById('idleScreen');
+            
+            // Hide idle screen and all media elements initially
+            idleScreen.style.display = 'none';
+            videoElement.style.display = 'none';
+            audioElement.style.display = 'none';
+            imageElement.style.display = 'none';
+            
+            const mediaInfo = event.mediaInfo;
+            const contentType = mediaInfo.contentType;
+            const contentUrl = mediaInfo.contentId;
+            
+            if (contentType.startsWith('video')) {
+                videoElement.src = contentUrl;
+                videoElement.style.display = 'block';
+                videoElement.play();
+            } else if (contentType.startsWith('audio')) {
+                audioElement.src = contentUrl;
+                audioElement.style.display = 'block';
+                audioElement.play();
+            } else if (contentType.startsWith('image')) {
+                imageElement.src = contentUrl;
+                imageElement.style.display = 'block';
+            }
+        }
+
+        function showIdleScreen() {
+            const idleScreen = document.getElementById('idleScreen');
+            const videoElement = document.getElementById('videoElement');
+            const audioElement = document.getElementById('audioElement');
+            const imageElement = document.getElementById('imageElement');
+
+            // Hide all media elements
+            videoElement.style.display = 'none';
+            audioElement.style.display = 'none';
+            imageElement.style.display = 'none';
+
+            // Show idle screen
+            idleScreen.style.display = 'block';
+        }
     </script>
 </body>
 </html>
+

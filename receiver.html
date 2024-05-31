@@ -4,11 +4,31 @@
     <meta charset="UTF-8">
     <title>Custom Receiver</title>
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-   
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 20px;
+        }
+        .media-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="video">
-        <video id="videoElement" controls></video>
+    <div class="media-container">
+        <video id="videoElement" class="hidden" controls></video>
+        <img id="imageElement" class="hidden" />
+        <audio id="audioElement" class="hidden" controls></audio>
     </div>
 
     <script type="text/javascript">
@@ -20,6 +40,28 @@
                 cast.framework.messages.MessageType.LOAD,
                 request => {
                     console.log('Media load request received', request);
+
+                    const mediaType = request.media.contentType;
+                    const videoElement = document.getElementById('videoElement');
+                    const imageElement = document.getElementById('imageElement');
+                    const audioElement = document.getElementById('audioElement');
+
+                    // Hide all media elements initially
+                    videoElement.classList.add('hidden');
+                    imageElement.classList.add('hidden');
+                    audioElement.classList.add('hidden');
+
+                    if (mediaType.startsWith('video/')) {
+                        videoElement.src = request.media.contentId;
+                        videoElement.classList.remove('hidden');
+                    } else if (mediaType.startsWith('image/')) {
+                        imageElement.src = request.media.contentId;
+                        imageElement.classList.remove('hidden');
+                    } else if (mediaType.startsWith('audio/')) {
+                        audioElement.src = request.media.contentId;
+                        audioElement.classList.remove('hidden');
+                    }
+
                     return request;
                 }
             );

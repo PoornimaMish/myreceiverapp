@@ -21,7 +21,7 @@
             justify-content: center;
             align-items: center;
         }
-        video, img, audio {
+        video, img, audio, iframe {
             max-width: 100%;
             max-height: 100%;
         }
@@ -32,6 +32,7 @@
         <video id="videoElement" controls style="display: none;"></video>
         <img id="imageElement" style="display: none;" />
         <audio id="audioElement" controls style="display: none;"></audio>
+        <iframe id="pdfFrame" style="display: none;" frameborder="0"></iframe>
     </div>
 
     <script type="text/javascript">
@@ -47,11 +48,13 @@
                     const videoElement = document.getElementById('videoElement');
                     const imageElement = document.getElementById('imageElement');
                     const audioElement = document.getElementById('audioElement');
+                    const pdfFrame = document.getElementById('pdfFrame');
 
                     // Hide all media elements initially
                     videoElement.style.display = 'none';
                     imageElement.style.display = 'none';
                     audioElement.style.display = 'none';
+                    pdfFrame.style.display = 'none';
 
                     if (mediaType.startsWith('video/')) {
                         videoElement.style.display = 'block';
@@ -62,6 +65,9 @@
                     } else if (mediaType.startsWith('audio/')) {
                         audioElement.style.display = 'block';
                         audioElement.src = request.media.contentUrl;
+                    } else if (mediaType === 'application/pdf') {
+                        pdfFrame.style.display = 'block';
+                        pdfFrame.src = request.media.contentUrl;
                     }
                     
                     return request;

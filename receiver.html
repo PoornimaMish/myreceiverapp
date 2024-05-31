@@ -80,6 +80,10 @@
             }
 
             const mediaInfo = new chrome.cast.media.MediaInfo('https://www.w3schools.com/html/mov_bbb.mp4', 'video/mp4');
+            mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
+            mediaInfo.metadata.title = "Sample Video";
+            mediaInfo.metadata.images = [{ url: 'https://www.w3schools.com/html/pic_trulli.jpg' }];
+
             const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
             castSession.loadMedia(request).then(

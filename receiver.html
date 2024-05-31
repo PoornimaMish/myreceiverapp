@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chromecast Media Player</title>
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,17 +27,10 @@
 <body>
     <button id="castButton">Cast Media</button>
     <div id="projectName">My Chromecast Project</div>
-    <video id="videoElement" width="600" controls style="display:none;">
-        <source src="your-video.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    <audio id="audioElement" controls style="display:none;">
-        <source src="your-audio.mp3" type="audio/mp3">
-        Your browser does not support the audio tag.
-    </audio>
-    <img id="imageElement" src="your-image.jpg" alt="Sample Image" style="display:none;">
 
     <script>
+        let castSession = null;
+
         // Initialize Cast API
         window['__onGCastApiAvailable'] = function(isAvailable) {
             if (isAvailable) {
@@ -46,44 +39,53 @@
         };
 
         function initializeCastApi() {
-            const castContext = cast.framework.CastContext.getInstance();
-            castContext.setOptions({
+            cast.framework.CastContext.getInstance().setOptions({
                 receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
                 autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
             });
 
             const castButton = document.getElementById('castButton');
             castButton.style.display = 'block';
-            
+
             castButton.addEventListener('click', () => {
-                const sessionRequest = new chrome.cast.SessionRequest(chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
-                const apiConfig = new chrome.cast.ApiConfig(sessionRequest, sessionListener, receiverListener);
-                chrome.cast.initialize(apiConfig, onInitSuccess, onError);
-                chrome.cast.requestSession(onRequestSessionSuccess, onError);
+                cast.framework.CastContext.getInstance().requestSession().then(onRequestSessionSuccess, onError);
             });
+
+            cast.framework.CastContext.getInstance().addEventListener(
+                cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+                function(event) {
+                    if (event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+                        event.sessionState === cast.framework.SessionState.SESSION_RESUMED) {
+                        castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+                        document.getElementById('projectName').style.display = 'block';
+                    }
+                }
+            );
         }
 
-        function onInitSuccess() {
-            console.log('Initialization success');
+        function onRequestSessionSuccess() {
+            console.log('Session started');
+            // Load media (e.g., video, audio, image) to Chromecast here
+            loadMedia();
         }
 
         function onError(message) {
             console.error('Error: ' + JSON.stringify(message));
         }
 
-        function onRequestSessionSuccess(session) {
-            console.log('Session success: ' + session.sessionId);
-            document.getElementById('projectName').style.display = 'block';
-        }
-
-        function sessionListener(session) {
-            console.log('New session ID: ' + session.sessionId);
-        }
-
-        function receiverListener(availability) {
-            if (availability === chrome.cast.ReceiverAvailability.AVAILABLE) {
-                console.log('Chromecast available');
+        function loadMedia() {
+            if (!castSession) {
+                console.error('No cast session available.');
+                return;
             }
+
+            const mediaInfo = new chrome.cast.media.MediaInfo('https://www.w3schools.com/html/mov_bbb.mp4', 'video/mp4');
+            const request = new chrome.cast.media.LoadRequest(mediaInfo);
+
+            castSession.loadMedia(request).then(
+                function() { console.log('Load succeed'); },
+                function(errorCode) { console.log('Error code: ' + errorCode); }
+            );
         }
     </script>
 </body>

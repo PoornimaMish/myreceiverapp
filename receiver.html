@@ -33,7 +33,6 @@
         <img id="imageElement" style="display: none;" />
         <audio id="audioElement" controls style="display: none;"></audio>
         <iframe id="pdfFrame" style="display: none;" frameborder="0"></iframe>
-        <iframe id="docFrame" style="display: none;" frameborder="0"></iframe>
     </div>
 
     <script type="text/javascript">
@@ -50,14 +49,12 @@
                     const imageElement = document.getElementById('imageElement');
                     const audioElement = document.getElementById('audioElement');
                     const pdfFrame = document.getElementById('pdfFrame');
-                    const docFrame = document.getElementById('docFrame');
 
                     // Hide all media elements initially
                     videoElement.style.display = 'none';
                     imageElement.style.display = 'none';
                     audioElement.style.display = 'none';
                     pdfFrame.style.display = 'none';
-                    docFrame.style.display = 'none';
 
                     if (mediaType.startsWith('video/')) {
                         videoElement.style.display = 'block';
@@ -71,9 +68,6 @@
                     } else if (mediaType === 'application/pdf') {
                         pdfFrame.style.display = 'block';
                         pdfFrame.src = request.media.contentUrl;
-                    } else if (mediaType === 'application/msword' || mediaType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                        docFrame.style.display = 'block';
-                        docFrame.src = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(request.media.contentUrl);
                     }
                     
                     return request;
